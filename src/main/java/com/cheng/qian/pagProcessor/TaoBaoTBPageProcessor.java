@@ -28,7 +28,7 @@ import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.processor.PageProcessor;
 
-public class TmallTBPageProcessor implements PageProcessor {
+public class TaoBaoTBPageProcessor implements PageProcessor {
     private static final String pwdAddress = "/Users/chengqianliang/tmallTB/";
     private Site                site       = Site.me()
         .addHeader("User-Agent",
@@ -44,106 +44,32 @@ public class TmallTBPageProcessor implements PageProcessor {
      * @see us.codecraft.webmagic.processor.PageProcessor#process(us.codecraft.webmagic.Page)
      */
     public void process(Page page) {
-        List<ImageDTO> imageDTOs = new ArrayList<ImageDTO>();
-        ImageDTO imageDTO = null;
-        String mkdir = null;
-        String titleText = null;
-        List<ColorKeyValue> colorKeyValues = new ArrayList<ColorKeyValue>();
-        ColorKeyValue colorKeyValue = null;
-        StringBuffer textContent = new StringBuffer();
+        System.out.println(page.getHtml().toString());
+        // System.out.println(page.getHtml().xpath("//div[@id='detail']"));
 
-        //System.out.println(page.getHtml().xpath("//ul[@id='J_UlThumb']"));
-        String shopSetUp = page.getHtml().xpath("//div[@id='J_DetailMeta']").toString();
-        // System.out.println(shopSetUp);
-        //标题描述
-        String titledetailHd = page.getHtml().xpath("//div[@class='tb-detail-hd']").toString();
-        // System.out.println("标题描述" + titledetailHd);
-        Document titleDescDocument = Jsoup.parse(titledetailHd);
-        textContent.append("标题:" + titleDescDocument.getElementsByTag("div").text() + "\r\n");
-        textContent
-            .append("\n描述" + "\r\n" + titleDescDocument.getElementsByTag("p").text() + "\r\n");
-        // 尺码  
-        String clotheSize = page.getHtml().xpath("//ul[@data-property='尺码']").toString();
-        //  System.out.println("尺码 " + clotheSize);
-        // Elements clotheSizeElements = Jsoup.parse("clotheSize").getElementsByTag("span");
-        Document clotheSizeDocument = Jsoup.parse(clotheSize);
-        textContent.append("\n尺码\n" + clotheSizeDocument.getElementsByTag("span").text() + "\r\n");
-        //颜色分类
-        String colorType = page.getHtml().xpath("//ul[@data-property='颜色分类']").toString();
-        System.out.println("颜色分类" + colorType + "\r\n");
-        textContent.append("颜色分类" + "\r\n");
-        Elements colorElements = Jsoup.parse(colorType).getElementsByTag("li");
+        // System.out.println(page.getHtml().xpath("//ul[@id='J_UlThumb']/li/div/a"));
+
+        //主图5
+        Document document = Jsoup.parse(page.getHtml().xpath("//ul[@id='J_UlThumb']").toString());
+        Elements imgElements = document.getElementsByTag("img");
+        for (int i = 0; i < imgElements.size(); i++) {
+            // System.out.println(imgElements.get(i).attr("data-src"));
+        }
+        //尺码
+        document = Jsoup.parse(page.getHtml().xpath("//ul[@data-property='尺码']").toString());
+        Elements sizeElements = document.getElementsByTag("span");
+        for (int i = 0; i < sizeElements.size(); i++) {
+            //  System.out.println(sizeElements.get(i).text());
+        }
+        //颜色 
+        document = Jsoup.parse(page.getHtml().xpath("//ul[@data-property='颜色分类']").toString());
+        Elements colorElements = document.getElementsByTag("a");
         for (int i = 0; i < colorElements.size(); i++) {
-            colorKeyValue = new ColorKeyValue();
-            colorKeyValue.setKey(colorElements.get(i).attr("data-value"));
-            colorKeyValue.setValue(colorElements.get(i).attr("title"));
-            textContent.append(colorElements.get(i).attr("title") + "\n");
-            colorKeyValues.add(colorKeyValue);
+            // System.out.println(sizeElements.get(i).text());
+            //  System.out.println(sizeElements.get(i).attr("style"));
         }
-        shopSetUp = shopSetUp.substring(shopSetUp.indexOf("TShop.Setup("));
-        int tShopSetUpIndexFinish = shopSetUp.indexOf(");");
-        //  System.out.println(shopSetUp.substring(12, tShopSetUpIndexFinish));
-        String shopSetUPJSON = shopSetUp.substring(12, tShopSetUpIndexFinish);
-        JSONObject jsonpObject = JSONObject.parseObject(shopSetUPJSON);
-        JSONObject jsonObjectAPI = jsonpObject.getJSONObject("api");
-        //详情图片XML 
-        imageDTOs.addAll(detailImage(jsonObjectAPI.getString("descUrl")));
-        //产品材料
-        JSONObject jsonObjectitemDO = jsonpObject.getJSONObject("itemDO");
-        JSONArray jsonArray = JSONObject.parseArray(jsonObjectitemDO.getString("attachImgUrl"));
-        if (jsonArray != null && jsonArray.size() > 0) {
-            for (int i = 0; i < jsonArray.size(); i++) {
-                imageDTO = new ImageDTO();
-                imageDTO.setName("产品材料" + i);
-                imageDTO.setUrl(jsonArray.getString(i));
-                imageDTO.setSaveAddress(SizeImage.S_MATERIAL.getAddress());
-                imageDTOs.add(imageDTO);
-            }
-        }
-        //五个主图 颜色图片
-        JSONObject jsonObjectPropertyPics = jsonpObject.getJSONObject("propertyPics");
-        try {
-            imageDTOs.addAll(propertyPics(jsonObjectPropertyPics, colorKeyValues));
-        } catch (Exception e) {
-            // TODO: handle exception
-            e.printStackTrace();
-        }
-        //生成文件夹 确认文件名
-        // mkdir = System.currentTimeMillis() + "";
-        mkdir = jsonObjectitemDO.getString("title").replaceAll(" ", "");
-        titleText = jsonObjectitemDO.getString("title");
-        System.out.println("API" + jsonpObject.get("api"));
-        System.out.println("itemDO" + jsonpObject.get("itemDO"));
-        System.out.println("propertyPics" + jsonpObject.get("propertyPics"));
+        System.out.println(page.getHtml().xpath("//div[@id='J_DivItemDesc']"));
 
-        //获取标题
-        //1创建文件夹
-        judeDirExists(pwdAddress + mkdir);
-        for (SizeImage sizeImage : SizeImage.values()) {
-            judeDirExists(pwdAddress + mkdir + "/" + sizeImage.getAddress());
-        }
-        //2写入文件信息
-        textContent.append("地址:" + page.getUrl());
-        WriteStringToFile(pwdAddress + mkdir + "/" + titleText, textContent.toString());
-        System.out.println("KJEFE" + JSONObject.toJSONString(imageDTOs));
-        for (int i = 0; i < imageDTOs.size(); i++) {
-            imageDTO = imageDTOs.get(i);
-            try {
-                if (imageDTO.getUrl().startsWith("//")) {
-                    imageDTO.setUrl("https:" + imageDTO.getUrl());
-                }
-                System.err.println(imageDTO.getUrl());
-                if (imageDTO.getSize() != null) {
-                    download(imageDTO.getUrl() + imageDTO.getSize(), imageDTO.getName() + ".jpg",
-                        pwdAddress + mkdir + "/" + imageDTO.getSaveAddress());
-                } else {
-                    download(imageDTO.getUrl(), imageDTO.getName() + ".jpg",
-                        pwdAddress + mkdir + "/" + imageDTO.getSaveAddress());
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     public Site getSite() {
