@@ -44,7 +44,11 @@ public class TaoBaoTBPageProcessor implements PageProcessor {
      * @see us.codecraft.webmagic.processor.PageProcessor#process(us.codecraft.webmagic.Page)
      */
     public void process(Page page) {
-        System.out.println(page.getHtml().toString());
+        String html = page.getHtml().toString();
+        List<ImageDTO> dtos = new ArrayList<ImageDTO>();
+        ImageDTO imageDTO = null;
+        StringBuffer buffer = new StringBuffer();
+        // System.out.println(page.getHtml().toString());
         // System.out.println(page.getHtml().xpath("//div[@id='detail']"));
 
         // System.out.println(page.getHtml().xpath("//ul[@id='J_UlThumb']/li/div/a"));
@@ -53,22 +57,102 @@ public class TaoBaoTBPageProcessor implements PageProcessor {
         Document document = Jsoup.parse(page.getHtml().xpath("//ul[@id='J_UlThumb']").toString());
         Elements imgElements = document.getElementsByTag("img");
         for (int i = 0; i < imgElements.size(); i++) {
-            // System.out.println(imgElements.get(i).attr("data-src"));
+            for (SizeImage sizeImage : SizeImage.values()) {
+                if (sizeImage.getSize() != null && !"".equals(sizeImage.getSize())) {
+                    imageDTO = new ImageDTO();
+                    imageDTO.setName("默认主图" + i + sizeImage.getSize());
+                    imageDTO.setUrl(imgElements.get(i).attr("data-src").replace("_50x50.jpg", ""));
+                    imageDTO.setSaveAddress(sizeImage.getAddress());
+                    imageDTO.setSize(sizeImage.getSize());
+                    dtos.add(imageDTO);
+                }
+            }
         }
+        //标题 描述
+        buffer.append("\r\n" + page.getHtml().xpath("//div[@id='J_Title']").toString() + "\r\n");
         //尺码
         document = Jsoup.parse(page.getHtml().xpath("//ul[@data-property='尺码']").toString());
         Elements sizeElements = document.getElementsByTag("span");
         for (int i = 0; i < sizeElements.size(); i++) {
-            //  System.out.println(sizeElements.get(i).text());
+            buffer.append("\r\n" + sizeElements.get(i).text());
         }
         //颜色 
         document = Jsoup.parse(page.getHtml().xpath("//ul[@data-property='颜色分类']").toString());
         Elements colorElements = document.getElementsByTag("a");
+        System.out.println(page.getHtml().xpath("//ul[@data-property='颜色分类']").toString());
+        String colorUrlImage = null;
         for (int i = 0; i < colorElements.size(); i++) {
-            // System.out.println(sizeElements.get(i).text());
-            //  System.out.println(sizeElements.get(i).attr("style"));
+            buffer.append("\r\n" + colorElements.get(i).getElementsByTag("span").text());
+            colorUrlImage = colorElements.get(i).attr("style").replace("background:url(", "");
+            colorUrlImage = colorUrlImage.replace(") center no-repeat;", "");
+            colorUrlImage = colorUrlImage.replace("_30x30.jpg", "");
+            for (SizeImage sizeImage : SizeImage.values()) {
+                if (sizeImage.getSize() != null && !"".equals(sizeImage.getSize())) {
+                    imageDTO = new ImageDTO();
+                    imageDTO.setName("颜色" + colorElements.get(i).getElementsByTag("span").text() + i
+                                     + sizeImage.getSize());
+                    imageDTO.setUrl(colorUrlImage);
+                    imageDTO.setSaveAddress(sizeImage.getAddress());
+                    imageDTO.setSize(sizeImage.getSize());
+                    dtos.add(imageDTO);
+                }
+            }
+
         }
-        System.out.println(page.getHtml().xpath("//div[@id='J_DivItemDesc']"));
+        //System.out.println(page.getHtml().xpath("//div[@id='J_DivItemDesc']"));
+
+        int indexScript = html.indexOf("<script>");
+        int closeScript = html.indexOf("</script>");
+        String g_config = html.substring(indexScript, closeScript);
+        String desc = null;
+        indexScript = g_config.indexOf("=");
+        closeScript = g_config.indexOf("};");
+        g_config = g_config.substring(indexScript + 1, closeScript + 1);
+        indexScript = g_config.indexOf("descUrl");
+        closeScript = g_config.indexOf("counterApi");
+        try {
+            g_config = g_config.substring(indexScript + 1, closeScript);
+            desc = g_config.replace(",", "").split(":")[3].replace("'//", "").replace("'", "");
+            dtos.addAll(detailImage(desc));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println(JSONObject.toJSONString(dtos));
+        //生成文件夹 确认文件名
+        // mkdir = System.currentTimeMillis() + "";
+        document = Jsoup.parse(page.getHtml().xpath("//div[@id='J_Title']").toString());
+
+        String mkdir = document.getElementsByTag("h3").text();
+        String titleText = mkdir;
+
+        //获取标题
+        //1创建文件夹
+        judeDirExists(pwdAddress + mkdir);
+        for (SizeImage sizeImage : SizeImage.values()) {
+            judeDirExists(pwdAddress + mkdir + "/" + sizeImage.getAddress());
+        }
+        //2写入文件信息
+        buffer.append("\r\n" + "地址:" + page.getUrl());
+        WriteStringToFile(pwdAddress + mkdir + "/" + titleText, buffer.toString());
+        System.out.println("KJEFE" + JSONObject.toJSONString(dtos));
+        for (int i = 0; i < dtos.size(); i++) {
+            imageDTO = dtos.get(i);
+            try {
+                if (imageDTO.getUrl().startsWith("//")) {
+                    imageDTO.setUrl("https:" + imageDTO.getUrl());
+                }
+                System.err.println(imageDTO.getUrl());
+                if (imageDTO.getSize() != null) {
+                    download(imageDTO.getUrl() + imageDTO.getSize(), imageDTO.getName() + ".jpg",
+                        pwdAddress + mkdir + "/" + imageDTO.getSaveAddress());
+                } else {
+                    download(imageDTO.getUrl(), imageDTO.getName() + ".jpg",
+                        pwdAddress + mkdir + "/" + imageDTO.getSaveAddress());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
     }
 
@@ -135,24 +219,22 @@ public class TaoBaoTBPageProcessor implements PageProcessor {
 
             HttpResponse response = HttpRequest.get(url).send();
             String desc = response.toString();
-            System.err.println(response);
             int descIndex = desc.indexOf("desc");
             int descClose = desc.lastIndexOf(";");
             desc = desc.substring(descIndex + 5, descClose);
-            System.out.println(desc);
             Document document = Jsoup.parse(desc);
             Elements elements = document.getElementsByTag("img");
-            System.out.println(elements.size());
             for (int i = 0; i < elements.size(); i++) {
-                if (elements.get(i).attr("src").contains("img.alicdn.com")) {
-                    System.out.println(elements.get(i).attr("src"));
+                if (elements.get(i).hasAttr("align")) {
                     imageDTO = new ImageDTO();
                     imageDTO.setName("详情" + i);
                     imageDTO.setUrl(elements.get(i).attr("src"));
                     imageDTO.setSaveAddress(SizeImage.S_DETAIl.getAddress());
                     dtos.add(imageDTO);
                 }
+
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -200,32 +282,36 @@ public class TaoBaoTBPageProcessor implements PageProcessor {
         System.out.println("urlString" + urlString);
         System.out.println(filename);
         System.out.println(savePath);
-        // 构造URL  
-        URL url = new URL(urlString);
-        // 打开连接  
-        URLConnection con = url.openConnection();
-        //设置请求超时为5s  
-        con.setConnectTimeout(5 * 1000);
-        // 输入流  
-        InputStream is = con.getInputStream();
+        try {
+            // 构造URL  
+            URL url = new URL(urlString);
+            // 打开连接  
+            URLConnection con = url.openConnection();
+            //设置请求超时为5s  
+            con.setConnectTimeout(5 * 1000);
+            // 输入流  
+            InputStream is = con.getInputStream();
 
-        // 1K的数据缓冲  
-        byte[] bs = new byte[1024];
-        // 读取到的数据长度  
-        int len;
-        // 输出的文件流  
-        File sf = new File(savePath);
-        if (!sf.exists()) {
-            sf.mkdirs();
+            // 1K的数据缓冲  
+            byte[] bs = new byte[1024];
+            // 读取到的数据长度  
+            int len;
+            // 输出的文件流  
+            File sf = new File(savePath);
+            if (!sf.exists()) {
+                sf.mkdirs();
+            }
+            OutputStream os = new FileOutputStream(sf.getPath() + "/" + filename);
+            // 开始读取  
+            while ((len = is.read(bs)) != -1) {
+                os.write(bs, 0, len);
+            }
+            // 完毕，关闭所有链接  
+            os.close();
+            is.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        OutputStream os = new FileOutputStream(sf.getPath() + "/" + filename);
-        // 开始读取  
-        while ((len = is.read(bs)) != -1) {
-            os.write(bs, 0, len);
-        }
-        // 完毕，关闭所有链接  
-        os.close();
-        is.close();
     }
 
 }
