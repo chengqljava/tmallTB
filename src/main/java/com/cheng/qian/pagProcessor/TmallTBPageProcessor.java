@@ -29,6 +29,7 @@ import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.processor.PageProcessor;
 
 public class TmallTBPageProcessor implements PageProcessor {
+
     private static  String pwdAddress = "/Users/chengqianliang/tmallTB/";
     private static boolean winMac=false;
     private Site                site       = Site.me()
