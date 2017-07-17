@@ -29,7 +29,8 @@ import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.processor.PageProcessor;
 
 public class TmallTBPageProcessor implements PageProcessor {
-    private static final String pwdAddress = "/Users/chengqianliang/tmallTB/";
+    private static  String pwdAddress = "/Users/chengqianliang/tmallTB/";
+    private static boolean winMac=false;
     private Site                site       = Site.me()
         .addHeader("User-Agent",
             "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36")
@@ -39,7 +40,16 @@ public class TmallTBPageProcessor implements PageProcessor {
         .addHeader("X-Requested-With", "XMLHttpRequest").setCharset("GBK")
         .addHeader("Connection", "keep-alive").setRetryTimes(3).setSleepTime(50000)
         .setTimeOut(30000);
-
+    public TmallTBPageProcessor() {
+  		super();
+  		String os = System.getProperty("os.name").toLowerCase();  
+  		if(os.toLowerCase().startsWith("win")){  
+  		  System.out.println(os + " can't gunzip");  
+  		  pwdAddress="E:\\tmallTB\\"+"tmall\\";
+  		winMac=true;
+  		}  
+  		
+  	}
     /** 
      * @see us.codecraft.webmagic.processor.PageProcessor#process(us.codecraft.webmagic.Page)
      */
@@ -120,11 +130,11 @@ public class TmallTBPageProcessor implements PageProcessor {
         //1创建文件夹
         judeDirExists(pwdAddress + mkdir);
         for (SizeImage sizeImage : SizeImage.values()) {
-            judeDirExists(pwdAddress + mkdir + "/" + sizeImage.getAddress());
+            judeDirExists(pwdAddress + mkdir +( winMac?"\\":"/") + sizeImage.getAddress());
         }
         //2写入文件信息
         textContent.append("地址:" + page.getUrl());
-        WriteStringToFile(pwdAddress + mkdir + "/" + titleText, textContent.toString());
+        WriteStringToFile(pwdAddress + mkdir +( winMac?"\\":"/")+ titleText, textContent.toString());
         System.out.println("KJEFE" + JSONObject.toJSONString(imageDTOs));
         for (int i = 0; i < imageDTOs.size(); i++) {
             imageDTO = imageDTOs.get(i);
@@ -135,10 +145,10 @@ public class TmallTBPageProcessor implements PageProcessor {
                 System.err.println(imageDTO.getUrl());
                 if (imageDTO.getSize() != null) {
                     download(imageDTO.getUrl() + imageDTO.getSize(), imageDTO.getName() + ".jpg",
-                        pwdAddress + mkdir + "/" + imageDTO.getSaveAddress());
+                        pwdAddress + mkdir +( winMac?"\\":"/") + imageDTO.getSaveAddress());
                 } else {
                     download(imageDTO.getUrl(), imageDTO.getName() + ".jpg",
-                        pwdAddress + mkdir + "/" + imageDTO.getSaveAddress());
+                        pwdAddress + mkdir + ( winMac?"\\":"/") + imageDTO.getSaveAddress());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -292,7 +302,7 @@ public class TmallTBPageProcessor implements PageProcessor {
         if (!sf.exists()) {
             sf.mkdirs();
         }
-        OutputStream os = new FileOutputStream(sf.getPath() + "/" + filename);
+        OutputStream os = new FileOutputStream(sf.getPath() + ( winMac?"\\":"/") + filename);
         // 开始读取  
         while ((len = is.read(bs)) != -1) {
             os.write(bs, 0, len);
