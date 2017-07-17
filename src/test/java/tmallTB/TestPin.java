@@ -5,7 +5,7 @@ import com.cheng.qian.pagProcessor.PinPageProcessor;
 import us.codecraft.webmagic.Spider;
 
 public class TestPin {
-    private static String url = "http://mobile.yangkeduo.com/goods.html?goods_id=8074154";
+    private static String url = "http://mobile.yangkeduo.com/goods.html?goods_id=11905512";
 
     public static void main(String[] args) {
         Spider spider = Spider.create(new PinPageProcessor());

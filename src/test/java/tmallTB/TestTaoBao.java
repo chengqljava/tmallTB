@@ -5,7 +5,8 @@ import com.cheng.qian.pagProcessor.TaoBaoTBPageProcessor;
 import us.codecraft.webmagic.Spider;
 
 public class TestTaoBao {
-    private static String url = "https://item.taobao.com/item.htm?id=549924513094";
+    private static String url = "https://item.taobao.com/item.htm?id=546626989578";
+    private static String title;
 
     public static void main(String[] args) {
         Spider spider = Spider.create(new TaoBaoTBPageProcessor());

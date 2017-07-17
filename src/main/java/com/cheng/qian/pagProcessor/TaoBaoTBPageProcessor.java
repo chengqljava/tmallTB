@@ -29,7 +29,7 @@ import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.processor.PageProcessor;
 
 public class TaoBaoTBPageProcessor implements PageProcessor {
-    private static final String pwdAddress = "/Users/chengqianliang/tmallTB/";
+    private static final String pwdAddress = "/Users/chengqianliang/wTTP/";
     private Site                site       = Site.me()
         .addHeader("User-Agent",
             "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36")
