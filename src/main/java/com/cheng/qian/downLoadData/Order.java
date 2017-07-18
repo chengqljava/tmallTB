@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.cheng.qian.model.GoodsIdOuterIdSpec;
 import com.cheng.qian.util.SignUtil;
 
 import jodd.http.HttpRequest;
@@ -32,8 +34,8 @@ public class Order {
         String sign = SignUtil.signRequest(params, secret);
         params.put("sign", sign);
         //参数序列
-        String paramSer = SignUtil.parmsStr(params);
-        System.out.println(paramSer);
+       // String paramSer = SignUtil.parmsStr(params);
+       // System.out.println(paramSer);
         HttpRequest httpRequest = HttpRequest.post("http://open.yangkeduo.com/api/router")
             .contentType("application/x-www-form-urlencoded; charset=UTF-8").form(params);
         HttpResponse httpResponse = httpRequest.send();
@@ -58,15 +60,15 @@ public class Order {
         if (total_count > (pageNumer * 100)) {
             orderList(mallId, secret, orderStatus, pageNumer++);
         }
-        System.out.println(JSONObject.toJSONString(orderSNs));
+       // System.out.println(JSONObject.toJSONString(orderSNs));
 
     }
 
-    public Map<String, Integer> orderDetail(String mallId, String secret, List<String> orderSNs) {
-        Map<String, Integer> codeColorSize = null;
+    public Map<String, Map<String,GoodsIdOuterIdSpec>> orderDetail(String mallId, String secret, List<String> orderSNs) {
+        Map<String, Map<String, GoodsIdOuterIdSpec>> codeColorSize = null;
         if (orderSNs != null && orderSNs.size() > 0) {
             Map<String, Object> params = null;
-            codeColorSize = new TreeMap<String, Integer>();
+            Map<String,GoodsIdOuterIdSpec> goodsIdOuterIdSpecMap=null;
             HttpRequest httpRequest = null;
             HttpResponse httpResponse = null;
             JSONObject jsonObject = null;
@@ -75,8 +77,10 @@ public class Order {
             JSONArray item_list = null;
             JSONObject item = null;
             String goodsIdOuterIdSpec = null;
+            String outerIdSpec=null;
             int goods_count = 0;
-            codeColorSize = new HashMap<String, Integer>();
+            GoodsIdOuterIdSpec idOuterIdSpec=null;
+            codeColorSize = new HashMap<String, Map<String,GoodsIdOuterIdSpec>>();
             for (String orderSN : orderSNs) {
                 params = new TreeMap<String, Object>();
                 params.put("mall_id", mallId);
@@ -97,21 +101,41 @@ public class Order {
                 item_list = order_info.getJSONArray("item_list");
                 for (int i = 0; i < item_list.size(); i++) {
                     item = item_list.getJSONObject(i);
-                    goodsIdOuterIdSpec = "商品ID_" + item.getString("goods_id") + "_商家编码_"
-                                         + item.getString("outer_id") + "_尺码_"
-                                         + item.getString("goods_spec");
+                    goodsIdOuterIdSpec = "商品ID_" + item.getString("goods_id");
+                    outerIdSpec= "商家编码_"
+                            + item.getString("outer_id") + "_尺码_"
+                            + item.getString("goods_spec");
                     goods_count = item.getIntValue("goods_count");
                     if (codeColorSize.containsKey(goodsIdOuterIdSpec)) {
-                        goods_count += codeColorSize.get(goodsIdOuterIdSpec);
-                    }
-                    codeColorSize.put(goodsIdOuterIdSpec, goods_count);
+                    	 if(codeColorSize.get(goodsIdOuterIdSpec).containsKey(outerIdSpec)){
+                     		idOuterIdSpec=codeColorSize.get(goodsIdOuterIdSpec).get(outerIdSpec);
+                     		idOuterIdSpec.setGoodsCount(idOuterIdSpec.getGoodsCount()+goods_count);
+                     	}else{
+                     		idOuterIdSpec=new GoodsIdOuterIdSpec();
+                     		idOuterIdSpec.setGoodsId(item.getString("goods_id"));
+                     		idOuterIdSpec.setGoodsSpec(item.getString("goods_spec"));
+                     		idOuterIdSpec.setOuterId(item.getString("outer_id"));
+                     		idOuterIdSpec.setGoodsCount(goods_count);
+                     		codeColorSize.get(goodsIdOuterIdSpec).put(outerIdSpec, idOuterIdSpec);
+                     	}
 
+                    }else{
+                    	goodsIdOuterIdSpecMap=new TreeMap<String, GoodsIdOuterIdSpec>();
+                    	idOuterIdSpec=new GoodsIdOuterIdSpec();
+                		idOuterIdSpec.setGoodsId(item.getString("goods_id"));
+                		idOuterIdSpec.setGoodsSpec(item.getString("goods_spec"));
+                		idOuterIdSpec.setOuterId(item.getString("outer_id"));
+                		idOuterIdSpec.setGoodsCount(goods_count);
+                    	goodsIdOuterIdSpecMap.put(outerIdSpec, idOuterIdSpec);
+                    	codeColorSize.put(goodsIdOuterIdSpec, goodsIdOuterIdSpecMap);
+                    }
+                   
                 }
 
             }
         }
 
-        System.out.println(JSONObject.toJSONString(codeColorSize));
+      //  System.out.println(JSONObject.toJSONString(codeColorSize));
         return codeColorSize;
     }
 
@@ -126,7 +150,15 @@ public class Order {
     public static void main(String[] args) {
         Order order = new Order();
         order.orderList("110937", "1308706231", "1", 1);
-        order.orderDetail("110937", "1308706231", order.getOrderSNs());
+        Map<String, Map<String, GoodsIdOuterIdSpec>> map= order.orderDetail("110937", "1308706231", order.getOrderSNs());
+        for(Map.Entry<String, Map<String, GoodsIdOuterIdSpec>> entry : map.entrySet()){  
+            //System.out.println(entry.getKey()+"="+entry.getValue());  
+            for( Entry<String, GoodsIdOuterIdSpec> outerIdSpec:entry.getValue().entrySet()){
+            	//System.out.println(outerIdSpec.getKey()+"="+outerIdSpec.getValue());  
+            	System.out.println(JSONObject.toJSONString(outerIdSpec.getValue()));
+            }
+        }  
+          
     }
 
 }

@@ -48,7 +48,7 @@ public abstract class SignUtil {
         }
         // 第三步：使用sha1加密
         query.append(secret);
-        System.out.println("SECRET " + query.toString());
+      //  System.out.println("SECRET " + query.toString());
         String sign = Encodes.encodeHex(Digests.md5(query.toString().getBytes()));
 
         return sign.toUpperCase();
