@@ -1,4 +1,10 @@
 /target/
+<<<<<<< HEAD
 .classpath
 .project
 ./settings/
+=======
+.project
+.classpath
+/.settings
+>>>>>>> branch 'master' of https://github.com/chengqljava/tmallTB.git
