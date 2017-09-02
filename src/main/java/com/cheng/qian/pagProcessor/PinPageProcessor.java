@@ -24,7 +24,8 @@ import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.processor.PageProcessor;
 
 public class PinPageProcessor implements PageProcessor {
-    private static final String pwdAddress = "/Users/chengqianliang/wTTP/";
+    private static  String pwdAddress = "/Users/chengqianliang/wTTP/";
+    private static boolean winMac =false;
     private Site                site       = Site.me()
         .addHeader("User-Agent",
             "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36")
@@ -34,6 +35,16 @@ public class PinPageProcessor implements PageProcessor {
         .addHeader("X-Requested-With", "XMLHttpRequest").setCharset("utf-8")
         .addHeader("Connection", "keep-alive").setRetryTimes(3).setSleepTime(50000)
         .setTimeOut(30000);
+    public PinPageProcessor() {
+  		super();
+  		String os = System.getProperty("os.name").toLowerCase();  
+  		if(os.toLowerCase().startsWith("win")){  
+  		  System.out.println(os + " can't gunzip");  
+  		  pwdAddress="E:\\tmallTB\\"+"pinduoduo\\";
+  		winMac=true;
+  		}  
+  		
+  	}
 
     /** 
      * @see us.codecraft.webmagic.processor.PageProcessor#process(us.codecraft.webmagic.Page)
@@ -99,7 +110,7 @@ public class PinPageProcessor implements PageProcessor {
                 imageDTO.setName(specs.getJSONObject(0).getString("spec_value"));
                 imageDTO.setSaveAddress(SizeImage.S200_200.getAddress());
                 imageDTO.setSize(SizeImage.S200_200.getSize());
-                imageDTO.setUrl(skus.getJSONObject(i).getString("thumbUrl"));
+                imageDTO.setUrl(skus.getJSONObject(i).getString("thumbUrl").replaceAll("@750w_1l_50Q","" ));
                 dtos.add(imageDTO);
                 strBuffer.append("\n" + specs.getJSONObject(0).getString("spec_value"));
             }
@@ -109,29 +120,29 @@ public class PinPageProcessor implements PageProcessor {
                 sizeList = new ArrayList<String>();
                 colorSizeMap.put(specs.getJSONObject(0).getString("spec_value"), sizeList);
             }
-            sizeList.add(specs.getJSONObject(1).getString("spec_value"));
-            strBuffer.append("\n" + specs.getJSONObject(1).getString("spec_value"));
+            sizeList.add(specs.getJSONObject(0).getString("spec_value"));
+            strBuffer.append("\n" + specs.getJSONObject(0).getString("spec_value"));
         }
 
         //获取标题
         //1创建文件夹
         judeDirExists(pwdAddress + mkdir);
         for (SizeImage sizeImage : SizeImage.values()) {
-            judeDirExists(pwdAddress + mkdir + "/" + sizeImage.getAddress());
+            judeDirExists(pwdAddress + mkdir +(winMac?"\\":"/") + sizeImage.getAddress());
         }
         //2写入文件信息
         strBuffer.append("\r\n" + "地址:" + page.getUrl());
-        WriteStringToFile(pwdAddress + mkdir + "/" + title, strBuffer.toString());
+        WriteStringToFile(pwdAddress + mkdir + (winMac?"\\":"/") + title, strBuffer.toString());
         for (int i = 0; i < dtos.size(); i++) {
             imageDTO = dtos.get(i);
             try {
                 System.err.println(imageDTO.getUrl());
                 if (imageDTO.getSize() != null) {
-                    download(imageDTO.getUrl(), imageDTO.getName() + ".jpg",
-                        pwdAddress + mkdir + "/" + imageDTO.getSaveAddress());
+                    download(imageDTO.getUrl().replace("@750w_1l_50Q", ""), imageDTO.getName() + ".jpg",
+                        pwdAddress + mkdir + (winMac?"\\":"/") + imageDTO.getSaveAddress());
                 } else {
-                    download(imageDTO.getUrl(), imageDTO.getName() + ".jpg",
-                        pwdAddress + mkdir + "/" + imageDTO.getSaveAddress());
+                    download(imageDTO.getUrl().replace("@750w_1l_50Q", ""), imageDTO.getName() + ".jpg",
+                        pwdAddress + mkdir + (winMac?"\\":"/") + imageDTO.getSaveAddress());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -194,6 +205,7 @@ public class PinPageProcessor implements PageProcessor {
         System.out.println("urlString" + urlString);
         System.out.println(filename);
         System.out.println(savePath);
+        urlString=urlString.replace("@750w_1l_50Q", "");
         try {
             // 构造URL  
             URL url = new URL(urlString);

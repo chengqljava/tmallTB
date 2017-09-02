@@ -6,7 +6,7 @@ import us.codecraft.webmagic.Spider;
 
 public class TestTaoBao {
 
-    private static String url = "https://item.taobao.com/item.htm?id=549879628703";
+    private static String url = "https://item.taobao.com/item.htm?id=556110927683";
 
     public static void main(String[] args) {
         Spider spider = Spider.create(new TaoBaoTBPageProcessor());

@@ -85,7 +85,7 @@ public class TaoBaoTBPageProcessor implements PageProcessor {
         System.out.println(page.getHtml().toString().contains("data-property='尺寸'"));
         //尺码
         String sizeStr=null;
-        if(page.getHtml().toString().contains("data-property='尺码'")){
+        if(page.getHtml().toString().contains("尺码")){
         sizeStr=page.getHtml().xpath("//ul[@data-property='尺码']").toString();
         }else{
         	sizeStr=page.getHtml().xpath("//ul[@data-property='尺寸']").toString();
