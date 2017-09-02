@@ -129,6 +129,7 @@ public class Order {
                     	goodsIdOuterIdSpecMap.put(outerIdSpec, idOuterIdSpec);
                     	codeColorSize.put(goodsIdOuterIdSpec, goodsIdOuterIdSpecMap);
                     }
+             
                    
                 }
 
