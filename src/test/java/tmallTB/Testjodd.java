@@ -7,11 +7,12 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
+import org.joda.time.DateTime;
+
 public class Testjodd {
     public static void main(String[] args) throws Exception {
-        download(
-            "http://omsproductionimg.yangkeduo.com/images/goods/1705223722417462/oJD8x06NLM5f4tTDlUi5bsA6X8QOy3gS.jpg",
-            "test.jpg", "/Users/chengqianliang/tmallTB");
+        DateTime dateTime = new DateTime(2082729600);
+        System.out.println(dateTime);
     }
 
     public static void download(String urlString, String filename,

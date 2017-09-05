@@ -71,7 +71,8 @@ public class Order {
     }
 
     public Map<String, Map<String, GoodsIdOuterIdSpec>> orderDetail(String mallId, String secret,
-                                                                    List<String> orderSNs) {
+                                                                    List<String> orderSNs,
+                                                                    List<String> notContain) {
         Map<String, Map<String, GoodsIdOuterIdSpec>> codeColorSize = null;
         if (orderSNs != null && orderSNs.size() > 0) {
             Map<String, Object> params = null;
@@ -101,10 +102,16 @@ public class Order {
                 httpRequest = HttpRequest.post("http://open.yangkeduo.com/api/router")
                     .contentType("application/x-www-form-urlencoded; charset=UTF-8").form(params);
                 httpResponse = httpRequest.send();
+                System.out.println(httpResponse.bodyText());
                 //获取内空转JSON
                 jsonObject = JSONObject.parseObject(httpResponse.bodyText());
                 order_info_get_response = jsonObject.getJSONObject("order_info_get_response");
                 order_info = order_info_get_response.getJSONObject("order_info");
+                if (notContain != null
+                    && notContain.contains(order_info.getString("receiver_phone"))) {
+                    continue;
+                }
+
                 item_list = order_info.getJSONArray("item_list");
                 for (int i = 0; i < item_list.size(); i++) {
                     item = item_list.getJSONObject(i);
@@ -158,7 +165,7 @@ public class Order {
         Order order = new Order();
         order.orderList("110937", "1308706231", "1", 1);
         Map<String, Map<String, GoodsIdOuterIdSpec>> map = order.orderDetail("110937", "1308706231",
-            order.getOrderSNs());
+            order.getOrderSNs(), null);
         StringBuffer strBuffer = new StringBuffer();
         List<String> columns = new ArrayList<String>();
         columns.add("商品ID");
@@ -202,7 +209,6 @@ public class Order {
                 null);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-
         }
     }
 
