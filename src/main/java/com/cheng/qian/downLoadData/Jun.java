@@ -36,7 +36,6 @@ public class Jun {
         List<String> codeSize = null;
         List<List<String>> codeSizeList = null;
         for (Map.Entry<String, Map<String, GoodsIdOuterIdSpec>> entry : map.entrySet()) {
-            System.out.println(entry.getKey() + "=" + entry.getValue());
             strBuffer.append(entry.getKey());
             for (Entry<String, GoodsIdOuterIdSpec> outerIdSpec : entry.getValue().entrySet()) {
                 //  System.out.println(outerIdSpec.getKey() + "=" + outerIdSpec.getValue());
