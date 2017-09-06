@@ -6,16 +6,16 @@ import us.codecraft.webmagic.Spider;
 
 public class TestTmall {
     
-    private static final String url = "https://detail.tmall.com/item.htm?id=552224169890";
+    private static final String url = "https://detail.tmall.com/item.htm?id=556732285112";
 
 
     public static void main(String[] args) {
         Spider spider = Spider.create(new TmallTBPageProcessor());
         spider.addUrl(url)
             // .addPipeline(starpropertyProjectPipeline)
-            //开启5个线程抓取
+            //寮�鍚�5涓嚎绋嬫姄鍙�
             .thread(1)
-            //启动爬虫
+            //鍚姩鐖櫕
             .run();
 
     }

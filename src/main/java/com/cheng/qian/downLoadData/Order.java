@@ -192,11 +192,11 @@ public class Order {
             strBuffer.append("\n");
 
         }
-        FileUtil.WriteStringToFile("/Users/chengqianliang/wTTP/test.txt", strBuffer.toString());
+        FileUtil.WriteStringToFile("E:\\tmallTB\\test.txt", strBuffer.toString());
 
         try {
             ExcelUtil.exportDataToExcel(columns, datas,
-                new FileOutputStream("/Users/chengqianliang/wTTP/"
+                new FileOutputStream("E:\\tmallTB\\"
                                      + DateTime.now().toString("yyyy-MM-dd_HH点mm分") + ".xls"),
                 DateTime.now().toString("yyyy-MM-dd_HH点mm分") + ".xls", "test", "PIN", null, null,
                 null);
