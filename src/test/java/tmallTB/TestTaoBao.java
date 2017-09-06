@@ -12,9 +12,9 @@ public class TestTaoBao {
         Spider spider = Spider.create(new TaoBaoTBPageProcessor());
         spider.addUrl(url)
             // .addPipeline(starpropertyProjectPipeline)
-        //开启5个线程抓取
-        .thread(1)
-        //启动爬虫
+            //开启5个线程抓取
+            .thread(1)
+            //启动爬虫
             .run();
 
     }
