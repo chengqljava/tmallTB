@@ -15,7 +15,12 @@ import com.cheng.qian.model.GoodsIdOuterIdSpec;
 import com.cheng.qian.util.ExcelUtil;
 
 public class Jun {
+    private static String  pwdAddress = "/Users/chengqianliang/tmallTB/";
+    private static boolean winMac     = false;
+
     public static void main(String[] args) {
+        pwdAddress = "E:\\order\\";
+        winMac = true;
         Order order = new Order();
         order.orderList("110937", "1308706231", "1", 1);
         Map<String, Map<String, GoodsIdOuterIdSpec>> map = order.orderDetail("110937", "1308706231",
@@ -72,9 +77,9 @@ public class Jun {
         // FileUtil.WriteStringToFile("/Users/chengqianliang/wTTP/test.txt", strBuffer.toString());
         try {
             ExcelUtil.exportDataToExcelImg(columns,
-                new FileOutputStream("/Users/chengqianliang/wTTP/"
+                new FileOutputStream((winMac ? pwdAddress : "/Users/chengqianliang/wTTP/") + "俊涛"
                                      + DateTime.now().toString("yyyy-MM-dd_HH点mm分") + ".xls"),
-                "俊涛" + DateTime.now().toString("yyyy-MM-dd_HH点mm分") + ".xls", "test", "PIN", null,
+                "俊涛" + DateTime.now().toString("yyyy-MM-dd_HH点mm分") + ".xls", "test", "衣美人", null,
                 null, null, goodIdsImg, goodIdsCodeSize);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
