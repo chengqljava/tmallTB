@@ -12,9 +12,9 @@ public class TestTmall {
         Spider spider = Spider.create(new TmallTBPageProcessor());
         spider.addUrl(url)
             // .addPipeline(starpropertyProjectPipeline)
-            //开启5个线程抓取
+            //寮�鍚�5涓嚎绋嬫姄鍙�
             .thread(1)
-            //启动爬虫
+            //鍚姩鐖櫕
             .run();
 
     }

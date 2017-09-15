@@ -23,8 +23,8 @@ public class Jun {
             pwdAddress = "E:\\order\\";
         }
         Order order = new Order();
-        order.orderList("110937", "1308706231", "1", 1);
-        Map<String, Map<String, GoodsIdOuterIdSpec>> map = order.orderDetail("110937", "1308706231",
+        order.orderList("195445", "1602108FB822A13CD442A07CAC2AB213", "1", 1);
+        Map<String, Map<String, GoodsIdOuterIdSpec>> map = order.orderDetail("195445", "1602108FB822A13CD442A07CAC2AB213",
             order.getOrderSNs(), null);
         System.out.println(JSONArray.toJSONString(map));
         StringBuffer strBuffer = new StringBuffer();
