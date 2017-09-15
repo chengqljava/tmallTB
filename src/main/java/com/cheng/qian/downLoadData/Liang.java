@@ -15,7 +15,7 @@ import com.cheng.qian.model.GoodsIdOuterIdSpec;
 import com.cheng.qian.util.ExcelUtil;
 
 public class Liang {
-    private static String pwdAddress = "/Users/chengqianliang/tmallTB/";
+    private static String pwdAddress = "/Users/chengqianliang/wTTP/";
 
     public static void main(String[] args) {
         String os = System.getProperty("os.name").toLowerCase();

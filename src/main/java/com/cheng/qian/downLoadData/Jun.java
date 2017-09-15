@@ -15,7 +15,7 @@ import com.cheng.qian.model.GoodsIdOuterIdSpec;
 import com.cheng.qian.util.ExcelUtil;
 
 public class Jun {
-    private static String pwdAddress = "/Users/chengqianliang/tmallTB/";
+    private static String pwdAddress = "/Users/chengqianliang/wTTP/";
 
     public static void main(String[] args) {
         String os = System.getProperty("os.name").toLowerCase();
@@ -24,8 +24,8 @@ public class Jun {
         }
         Order order = new Order();
         order.orderList("195445", "1602108FB822A13CD442A07CAC2AB213", "1", 1);
-        Map<String, Map<String, GoodsIdOuterIdSpec>> map = order.orderDetail("195445", "1602108FB822A13CD442A07CAC2AB213",
-            order.getOrderSNs(), null);
+        Map<String, Map<String, GoodsIdOuterIdSpec>> map = order.orderDetail("195445",
+            "1602108FB822A13CD442A07CAC2AB213", order.getOrderSNs(), null);
         System.out.println(JSONArray.toJSONString(map));
         StringBuffer strBuffer = new StringBuffer();
         List<String> columns = new ArrayList<String>();
