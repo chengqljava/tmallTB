@@ -427,7 +427,6 @@ public class ExcelUtil {
 
     }
 
-    @SuppressWarnings("unused")
     private static void writeSheetImg(List<String> colsNames, String sheetname, String title,
                                       String foot, String colmerge, int width, String[] conditions,
                                       WritableWorkbook workbook, Map<String, String> goodImgs,
