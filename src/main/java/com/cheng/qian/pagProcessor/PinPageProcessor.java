@@ -53,6 +53,7 @@ public class PinPageProcessor implements PageProcessor {
     public void process(Page page) {
         try {
             String html = page.getHtml().toString();
+            System.out.println(html);
             int index = html.indexOf("window.rawData=");
             int close = html.indexOf("<script>!function");
             html = html.substring(index, close);
