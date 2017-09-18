@@ -24,9 +24,9 @@ import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.processor.PageProcessor;
 
 public class PinPageProcessor implements PageProcessor {
-    private static  String pwdAddress = "/Users/chengqianliang/wTTP/";
-    private static boolean winMac =false;
-    private Site                site       = Site.me()
+    private static String  pwdAddress = "/Users/chengqianliang/wTTP/";
+    private static boolean winMac     = false;
+    private Site           site       = Site.me()
         .addHeader("User-Agent",
             "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36")
         .addHeader("Accept", "*/*").addHeader("Accept-Encoding", "gzip, deflate, sdch")
@@ -35,120 +35,131 @@ public class PinPageProcessor implements PageProcessor {
         .addHeader("X-Requested-With", "XMLHttpRequest").setCharset("utf-8")
         .addHeader("Connection", "keep-alive").setRetryTimes(3).setSleepTime(50000)
         .setTimeOut(30000);
+
     public PinPageProcessor() {
-  		super();
-  		String os = System.getProperty("os.name").toLowerCase();  
-  		if(os.toLowerCase().startsWith("win")){  
-  		  System.out.println(os + " can't gunzip");  
-  		  pwdAddress="E:\\tmallTB\\"+"pinduoduo\\";
-  		winMac=true;
-  		}  
-  		
-  	}
+        super();
+        String os = System.getProperty("os.name").toLowerCase();
+        if (os.toLowerCase().startsWith("win")) {
+            System.out.println(os + " can't gunzip");
+            pwdAddress = "E:\\tmallTB\\" + "pinduoduo\\";
+            winMac = true;
+        }
+
+    }
 
     /** 
      * @see us.codecraft.webmagic.processor.PageProcessor#process(us.codecraft.webmagic.Page)
      */
     public void process(Page page) {
-        String html = page.getHtml().toString();
-        System.out.println(html);
-        int index = html.indexOf("window.rawData=");
-        int close = html.indexOf("</script>");
-        html = html.substring(index, close);
-        html = html.replace("window.rawData=", "");
-        html = html.replace(";", "");
-        String title, mkdir;
-        StringBuffer strBuffer = new StringBuffer();
-        List<ImageDTO> dtos = new ArrayList<ImageDTO>();
-        ImageDTO imageDTO = null;
-        JSONObject jsonObject = JSONObject.parseObject(html);
-        jsonObject = JSONObject.parseObject(jsonObject.getString("goods"));
-        System.out.println(jsonObject.toJSONString());
-        //标题
-        System.out.println(jsonObject.getString("goodsName"));
-        title = jsonObject.getString("goodsName");
-        mkdir = jsonObject.getString("goodsName");
-        strBuffer.append("\r\n标题\n" + jsonObject.getString("goodsName"));
-        //描述
-        System.out.println(jsonObject.getString("goodsDesc"));
-        strBuffer.append("\r\n描述\n" + jsonObject.getString("goodsDesc"));
-        //主
-        System.out.println(jsonObject.getString("topGallery"));
-        JSONArray jsonArray = JSONObject.parseArray(jsonObject.getString("topGallery"));
-        for (int i = 0; i < jsonArray.size(); i++) {
-            imageDTO = new ImageDTO();
-            imageDTO.setName("主图" + i);
-            imageDTO.setUrl(jsonArray.getString(i));
-            imageDTO.setSaveAddress(SizeImage.S800_800.getSize());
-            imageDTO.setSaveAddress(SizeImage.S800_800.getAddress());
-            dtos.add(imageDTO);
-        }
-        //描述
-        System.out.println(jsonObject.getString("detailGallery"));
-        JSONArray detailGallery = JSONObject.parseArray(jsonObject.getString("detailGallery"));
-        for (int i = 0; i < detailGallery.size(); i++) {
-            imageDTO = new ImageDTO();
-            imageDTO.setName("详情" + i);
-            imageDTO.setUrl(detailGallery.getJSONObject(i).getString("url"));
-            imageDTO.setSaveAddress(SizeImage.S_DETAIl.getSize());
-            imageDTO.setSaveAddress(SizeImage.S_DETAIl.getAddress());
-            dtos.add(imageDTO);
-        }
-        //skus
-        System.out.println(jsonObject.getString("skus"));
-        JSONArray skus = JSONObject.parseArray(jsonObject.getString("skus"));
-        JSONArray specs = null;
-        List<String> thumbUrls = new ArrayList<String>();
-        Map<String, List<String>> colorSizeMap = new HashMap<String, List<String>>();
-        List<String> sizeList = null;
-        strBuffer.append("\r\n颜色\n");
-        for (int i = 0; i < skus.size(); i++) {
-            specs = skus.getJSONObject(i).getJSONArray("specs");
-            if (!thumbUrls.contains(skus.getJSONObject(i).getString("thumbUrl"))) {
-                thumbUrls.add(skus.getJSONObject(i).getString("thumbUrl"));
+        try {
+            String html = page.getHtml().toString();
+            int index = html.indexOf("window.rawData=");
+            int close = html.indexOf("<script>!function");
+            html = html.substring(index, close);
+            html = html.replace("window.rawData=", "");
+            html = html.replace("</script> ", "");
+            html = html.replace(";", "");
+            System.out.println(html);
+            String title, mkdir;
+            StringBuffer strBuffer = new StringBuffer();
+            List<ImageDTO> dtos = new ArrayList<ImageDTO>();
+            ImageDTO imageDTO = null;
+            JSONObject jsonObject = JSONObject.parseObject(html);
+            jsonObject = JSONObject.parseObject(jsonObject.getString("goods"));
+            System.out.println(jsonObject.toJSONString());
+            //标题
+            System.out.println(jsonObject.getString("goodsName"));
+            title = jsonObject.getString("goodsName");
+            mkdir = jsonObject.getString("goodsName");
+            strBuffer.append("\r\n标题\n" + jsonObject.getString("goodsName"));
+            //描述
+            System.out.println(jsonObject.getString("goodsDesc"));
+            strBuffer.append("\r\n描述\n" + jsonObject.getString("goodsDesc"));
+            //主
+            System.out.println(jsonObject.getString("topGallery"));
+            JSONArray jsonArray = JSONObject.parseArray(jsonObject.getString("topGallery"));
+            for (int i = 0; i < jsonArray.size(); i++) {
                 imageDTO = new ImageDTO();
-                imageDTO.setName(specs.getJSONObject(0).getString("spec_value"));
-                imageDTO.setSaveAddress(SizeImage.S200_200.getAddress());
-                imageDTO.setSize(SizeImage.S200_200.getSize());
-                imageDTO.setUrl(skus.getJSONObject(i).getString("thumbUrl").replaceAll("@750w_1l_50Q","" ));
+                imageDTO.setName("主图" + i);
+                imageDTO.setUrl(jsonArray.getString(i));
+                imageDTO.setSaveAddress(SizeImage.S800_800.getSize());
+                imageDTO.setSaveAddress(SizeImage.S800_800.getAddress());
                 dtos.add(imageDTO);
+            }
+            //描述
+            System.out.println(jsonObject.getString("detailGallery"));
+            JSONArray detailGallery = JSONObject.parseArray(jsonObject.getString("detailGallery"));
+            for (int i = 0; i < detailGallery.size(); i++) {
+                imageDTO = new ImageDTO();
+                imageDTO.setName("详情" + i);
+                imageDTO.setUrl(detailGallery.getJSONObject(i).getString("url"));
+                imageDTO.setSaveAddress(SizeImage.S_DETAIl.getSize());
+                imageDTO.setSaveAddress(SizeImage.S_DETAIl.getAddress());
+                dtos.add(imageDTO);
+            }
+            //skus
+            System.out.println(jsonObject.getString("skus"));
+            JSONArray skus = JSONObject.parseArray(jsonObject.getString("skus"));
+            JSONArray specs = null;
+            List<String> thumbUrls = new ArrayList<String>();
+            Map<String, List<String>> colorSizeMap = new HashMap<String, List<String>>();
+            List<String> sizeList = null;
+            strBuffer.append("\r\n颜色\n");
+            for (int i = 0; i < skus.size(); i++) {
+                specs = skus.getJSONObject(i).getJSONArray("specs");
+                if (!thumbUrls.contains(skus.getJSONObject(i).getString("thumbUrl"))) {
+                    thumbUrls.add(skus.getJSONObject(i).getString("thumbUrl"));
+                    imageDTO = new ImageDTO();
+                    imageDTO.setName(specs.getJSONObject(0).getString("spec_value"));
+                    imageDTO.setSaveAddress(SizeImage.S200_200.getAddress());
+                    imageDTO.setSize(SizeImage.S200_200.getSize());
+                    imageDTO.setUrl(
+                        skus.getJSONObject(i).getString("thumbUrl").replaceAll("@750w_1l_50Q", ""));
+                    dtos.add(imageDTO);
+                    strBuffer.append("\n" + specs.getJSONObject(0).getString("spec_value"));
+                }
+                if (colorSizeMap.containsKey(specs.getJSONObject(0).getString("spec_value"))) {
+                    sizeList = colorSizeMap.get(specs.getJSONObject(0).getString("spec_value"));
+                } else {
+                    sizeList = new ArrayList<String>();
+                    colorSizeMap.put(specs.getJSONObject(0).getString("spec_value"), sizeList);
+                }
+                sizeList.add(specs.getJSONObject(0).getString("spec_value"));
                 strBuffer.append("\n" + specs.getJSONObject(0).getString("spec_value"));
             }
-            if (colorSizeMap.containsKey(specs.getJSONObject(0).getString("spec_value"))) {
-                sizeList = colorSizeMap.get(specs.getJSONObject(0).getString("spec_value"));
-            } else {
-                sizeList = new ArrayList<String>();
-                colorSizeMap.put(specs.getJSONObject(0).getString("spec_value"), sizeList);
-            }
-            sizeList.add(specs.getJSONObject(0).getString("spec_value"));
-            strBuffer.append("\n" + specs.getJSONObject(0).getString("spec_value"));
-        }
 
-        //获取标题
-        //1创建文件夹
-        judeDirExists(pwdAddress + mkdir);
-        for (SizeImage sizeImage : SizeImage.values()) {
-            judeDirExists(pwdAddress + mkdir +(winMac?"\\":"/") + sizeImage.getAddress());
-        }
-        //2写入文件信息
-        strBuffer.append("\r\n" + "地址:" + page.getUrl());
-        WriteStringToFile(pwdAddress + mkdir + (winMac?"\\":"/") + title, strBuffer.toString());
-        for (int i = 0; i < dtos.size(); i++) {
-            imageDTO = dtos.get(i);
-            try {
-                System.err.println(imageDTO.getUrl());
-                if (imageDTO.getSize() != null) {
-                    download(imageDTO.getUrl().replace("@750w_1l_50Q", ""), imageDTO.getName() + ".jpg",
-                        pwdAddress + mkdir + (winMac?"\\":"/") + imageDTO.getSaveAddress());
-                } else {
-                    download(imageDTO.getUrl().replace("@750w_1l_50Q", ""), imageDTO.getName() + ".jpg",
-                        pwdAddress + mkdir + (winMac?"\\":"/") + imageDTO.getSaveAddress());
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+            //获取标题
+            //1创建文件夹
+            judeDirExists(pwdAddress + mkdir);
+            for (SizeImage sizeImage : SizeImage.values()) {
+                judeDirExists(pwdAddress + mkdir + (winMac ? "\\" : "/") + sizeImage.getAddress());
             }
+            //2写入文件信息
+            strBuffer.append("\r\n" + "地址:" + page.getUrl());
+            WriteStringToFile(pwdAddress + mkdir + (winMac ? "\\" : "/") + title,
+                strBuffer.toString());
+            for (int i = 0; i < dtos.size(); i++) {
+                imageDTO = dtos.get(i);
+                try {
+                    System.err.println(imageDTO.getUrl());
+                    if (imageDTO.getSize() != null) {
+                        download(imageDTO.getUrl().replace("@750w_1l_50Q", ""),
+                            imageDTO.getName() + ".jpg",
+                            pwdAddress + mkdir + (winMac ? "\\" : "/") + imageDTO.getSaveAddress());
+                    } else {
+                        download(imageDTO.getUrl().replace("@750w_1l_50Q", ""),
+                            imageDTO.getName() + ".jpg",
+                            pwdAddress + mkdir + (winMac ? "\\" : "/") + imageDTO.getSaveAddress());
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            System.out.println(JSONObject.toJSONString(dtos));
+        } catch (Exception e) {
+            // TODO: handle exception
+            e.printStackTrace();
         }
-        System.out.println(JSONObject.toJSONString(dtos));
 
     }
 
@@ -204,7 +215,7 @@ public class PinPageProcessor implements PageProcessor {
         System.out.println("urlString" + urlString);
         System.out.println(filename);
         System.out.println(savePath);
-        urlString=urlString.replace("@750w_1l_50Q", "");
+        urlString = urlString.replace("@750w_1l_50Q", "");
         try {
             // 构造URL  
             URL url = new URL(urlString);
