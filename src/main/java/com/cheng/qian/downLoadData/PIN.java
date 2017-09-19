@@ -15,11 +15,14 @@ import com.cheng.qian.model.GoodsIdOuterIdSpec;
 import com.cheng.qian.util.ExcelUtil;
 
 public class PIN {
-	 private static String  pwdAddress = "/Users/chengqianliang/tmallTB/";
-	 private static boolean winMac     = false;
+    private static String pwdAddress = "/Users/chengqianliang/wTTP/";
+
     public static void main(String[] args) {
-    	 pwdAddress = "E:\\order\\";
-         winMac = true;
+
+        String os = System.getProperty("os.name").toLowerCase();
+        if (os.toLowerCase().startsWith("win")) {
+            pwdAddress = "E:\\order\\";
+        }
         Order order = new Order();
         order.orderList("110937", "1308706231", "1", 1);
         Map<String, Map<String, GoodsIdOuterIdSpec>> map = order.orderDetail("110937", "1308706231",
@@ -76,8 +79,8 @@ public class PIN {
         // FileUtil.WriteStringToFile("/Users/chengqianliang/wTTP/test.txt", strBuffer.toString());
         try {
             ExcelUtil.exportDataToExcelImg(columns,
-                new FileOutputStream((winMac?pwdAddress:"/Users/chengqianliang/wTTP/")
-                                     + "PIN" + DateTime.now().toString("yyyy-MM-dd_HH点mm分") + ".xls"),
+                new FileOutputStream(
+                    pwdAddress + "PIN" + DateTime.now().toString("yyyy-MM-dd_HH点mm分") + ".xls"),
                 "PIN" + DateTime.now().toString("yyyy-MM-dd_HH点mm分") + ".xls", "test", "PIN", null,
                 null, null, goodIdsImg, goodIdsCodeSize);
         } catch (FileNotFoundException e) {

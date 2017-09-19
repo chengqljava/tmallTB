@@ -15,16 +15,17 @@ import com.cheng.qian.model.GoodsIdOuterIdSpec;
 import com.cheng.qian.util.ExcelUtil;
 
 public class Jun {
-    private static String  pwdAddress = "/Users/chengqianliang/tmallTB/";
-    private static boolean winMac     = false;
+    private static String pwdAddress = "/Users/chengqianliang/wTTP/";
 
     public static void main(String[] args) {
-        pwdAddress = "E:\\order\\";
-        winMac = true;
+        String os = System.getProperty("os.name").toLowerCase();
+        if (os.toLowerCase().startsWith("win")) {
+            pwdAddress = "E:\\order\\";
+        }
         Order order = new Order();
         order.orderList("195445", "1602108FB822A13CD442A07CAC2AB213", "1", 1);
-        Map<String, Map<String, GoodsIdOuterIdSpec>> map = order.orderDetail("195445", "1602108FB822A13CD442A07CAC2AB213",
-            order.getOrderSNs(), null);
+        Map<String, Map<String, GoodsIdOuterIdSpec>> map = order.orderDetail("195445",
+            "1602108FB822A13CD442A07CAC2AB213", order.getOrderSNs(), null);
         System.out.println(JSONArray.toJSONString(map));
         StringBuffer strBuffer = new StringBuffer();
         List<String> columns = new ArrayList<String>();
@@ -77,8 +78,8 @@ public class Jun {
         // FileUtil.WriteStringToFile("/Users/chengqianliang/wTTP/test.txt", strBuffer.toString());
         try {
             ExcelUtil.exportDataToExcelImg(columns,
-                new FileOutputStream((winMac ? pwdAddress : "/Users/chengqianliang/wTTP/") + "俊涛"
-                                     + DateTime.now().toString("yyyy-MM-dd_HH点mm分") + ".xls"),
+                new FileOutputStream(
+                    pwdAddress + "俊涛" + DateTime.now().toString("yyyy-MM-dd_HH点mm分") + ".xls"),
                 "俊涛" + DateTime.now().toString("yyyy-MM-dd_HH点mm分") + ".xls", "test", "衣美人", null,
                 null, null, goodIdsImg, goodIdsCodeSize);
         } catch (FileNotFoundException e) {

@@ -25,8 +25,9 @@ public class Order {
     //mall_id 110937 secret 1308706231
 
     private List<String> orderSNs = new ArrayList<String>();
-    private static boolean winMac=false;
+
     public void orderList(String mallId, String secret, String orderStatus, int pageNumer) {
+
         Map<String, Object> params = new TreeMap<String, Object>();
         params.put("mall_id", mallId);
         params.put("type", "pdd.order.number.list.get");
@@ -47,6 +48,8 @@ public class Order {
         HttpResponse httpResponse = httpRequest.send();
         //获取内空转JSON
         JSONObject jsonObject = JSONObject.parseObject(httpResponse.bodyText());
+        System.out.println("pageNumber" + pageNumer);
+        System.err.println("jsonObject" + jsonObject);
         //获取信息
         JSONObject order_sn_list_get_response = jsonObject
             .getJSONObject("order_sn_list_get_response");
@@ -63,8 +66,9 @@ public class Order {
             }
 
         }
-        if (total_count > (pageNumer * 100)) {
-            orderList(mallId, secret, orderStatus, pageNumer++);
+        if (total_count > 0) {
+            pageNumer++;
+            this.orderList(mallId, secret, orderStatus, pageNumer);
         }
 
     }
