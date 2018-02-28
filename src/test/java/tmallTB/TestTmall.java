@@ -6,7 +6,7 @@ import us.codecraft.webmagic.Spider;
 
 public class TestTmall {
 
-    private static final String url = "https://detail.tmall.com/item.htm?id=546673178838";
+    private static final String url = "https://detail.tmall.com/item.htm?id=559682873844";
 
     public static void main(String[] args) {
         Spider spider = Spider.create(new TmallTBPageProcessor());

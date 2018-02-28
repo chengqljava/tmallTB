@@ -12,6 +12,7 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -30,9 +31,9 @@ import us.codecraft.webmagic.processor.PageProcessor;
 
 public class TmallTBPageProcessor implements PageProcessor {
 
-    private static  String pwdAddress = "/Users/chengqianliang/tmallTB/";
-    private static boolean winMac=false;
-    private Site                site       = Site.me()
+    private static String  pwdAddress = "/Users/chengqianliang/tmallTB/";
+    private static boolean winMac     = false;
+    private Site           site       = Site.me()
         .addHeader("User-Agent",
             "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36")
         .addHeader("Accept", "*/*").addHeader("Accept-Encoding", "gzip, deflate, sdch")
@@ -41,16 +42,18 @@ public class TmallTBPageProcessor implements PageProcessor {
         .addHeader("X-Requested-With", "XMLHttpRequest").setCharset("GBK")
         .addHeader("Connection", "keep-alive").setRetryTimes(3).setSleepTime(50000)
         .setTimeOut(30000);
+
     public TmallTBPageProcessor() {
-  		super();
-  		String os = System.getProperty("os.name").toLowerCase();  
-  		if(os.toLowerCase().startsWith("win")){  
-  		  System.out.println(os + " can't gunzip");  
-  		  pwdAddress="E:\\tmallTB\\"+"tmall\\";
-  		winMac=true;
-  		}  
-  		
-  	}
+        super();
+        String os = System.getProperty("os.name").toLowerCase();
+        if (os.toLowerCase().startsWith("win")) {
+            System.out.println(os + " can't gunzip");
+            pwdAddress = "E:\\tmallTB\\" + "tmall\\";
+            winMac = true;
+        }
+
+    }
+
     /** 
      * @see us.codecraft.webmagic.processor.PageProcessor#process(us.codecraft.webmagic.Page)
      */
@@ -62,7 +65,6 @@ public class TmallTBPageProcessor implements PageProcessor {
         List<ColorKeyValue> colorKeyValues = new ArrayList<ColorKeyValue>();
         ColorKeyValue colorKeyValue = null;
         StringBuffer textContent = new StringBuffer();
-
         //System.out.println(page.getHtml().xpath("//ul[@id='J_UlThumb']"));
         String shopSetUp = page.getHtml().xpath("//div[@id='J_DetailMeta']").toString();
         // System.out.println(shopSetUp);
@@ -131,12 +133,12 @@ public class TmallTBPageProcessor implements PageProcessor {
         //1创建文件夹
         judeDirExists(pwdAddress + mkdir);
         for (SizeImage sizeImage : SizeImage.values()) {
-            judeDirExists(pwdAddress + mkdir +( winMac?"\\":"/") + sizeImage.getAddress());
+            judeDirExists(pwdAddress + mkdir + (winMac ? "\\" : "/") + sizeImage.getAddress());
         }
         //2写入文件信息
         textContent.append("地址:" + page.getUrl());
-        WriteStringToFile(pwdAddress + mkdir +( winMac?"\\":"/")+ titleText, textContent.toString());
-        System.out.println("KJEFE" + JSONObject.toJSONString(imageDTOs));
+        WriteStringToFile(pwdAddress + mkdir + (winMac ? "\\" : "/") + titleText,
+            textContent.toString());
         for (int i = 0; i < imageDTOs.size(); i++) {
             imageDTO = imageDTOs.get(i);
             try {
@@ -146,15 +148,20 @@ public class TmallTBPageProcessor implements PageProcessor {
                 System.err.println(imageDTO.getUrl());
                 if (imageDTO.getSize() != null) {
                     download(imageDTO.getUrl() + imageDTO.getSize(), imageDTO.getName() + ".jpg",
-                        pwdAddress + mkdir +( winMac?"\\":"/") + imageDTO.getSaveAddress());
+                        pwdAddress + mkdir + (winMac ? "\\" : "/") + imageDTO.getSaveAddress());
                 } else {
                     download(imageDTO.getUrl(), imageDTO.getName() + ".jpg",
-                        pwdAddress + mkdir + ( winMac?"\\":"/") + imageDTO.getSaveAddress());
+                        pwdAddress + mkdir + (winMac ? "\\" : "/") + imageDTO.getSaveAddress());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+        //Video
+        String videoUrl = pwdAddress + mkdir + (winMac ? "\\" : "/") + "video";
+        judeDirExists(videoUrl);
+        video(page.getHtml().toString(), videoUrl);
+
     }
 
     public Site getSite() {
@@ -280,6 +287,34 @@ public class TmallTBPageProcessor implements PageProcessor {
         return dtos;
     }
 
+    public void video(String html, String savePath) {
+        int start, end;
+        start = html.indexOf("TShop.Setup(");
+        html = html.substring(start);
+        end = html.indexOf(");");
+        html = html.substring(0, end).replace("TShop.Setup(", "");
+        System.err.println(html);
+        JSONObject jsonObject = JSONObject.parseObject(html);
+        //Video
+        String imgVedioPic = jsonObject.getJSONObject("itemDO").getString("imgVedioPic");
+        String imgVedioUrl = jsonObject.getJSONObject("itemDO").getString("imgVedioUrl");
+        if (StringUtils.isNotBlank(imgVedioPic)) {
+            try {
+                download(imgVedioPic.replaceAll("//", "http://"), "imgVedioPic.jpg", savePath);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (StringUtils.isNotBlank(imgVedioUrl)) {
+            try {
+                download(imgVedioUrl.replaceAll("//", "http://"),
+                    "imgVedioUrl" + imgVedioUrl.substring(imgVedioUrl.lastIndexOf(".")), savePath);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public static void download(String urlString, String filename,
                                 String savePath) throws Exception {
         System.out.println("urlString" + urlString);
@@ -303,7 +338,7 @@ public class TmallTBPageProcessor implements PageProcessor {
         if (!sf.exists()) {
             sf.mkdirs();
         }
-        OutputStream os = new FileOutputStream(sf.getPath() + ( winMac?"\\":"/") + filename);
+        OutputStream os = new FileOutputStream(sf.getPath() + (winMac ? "\\" : "/") + filename);
         // 开始读取  
         while ((len = is.read(bs)) != -1) {
             os.write(bs, 0, len);
