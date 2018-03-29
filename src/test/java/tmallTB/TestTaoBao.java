@@ -1,15 +1,15 @@
 package tmallTB;
 
-import com.cheng.qian.pagProcessor.TaoBaoTBPageProcessor;
+import com.cheng.qian.pagProcessor.TaoBaoTBJSONPageProcessor;
 
 import us.codecraft.webmagic.Spider;
 
 public class TestTaoBao {
 
-    private static String url = "https://item.taobao.com/item.htm?id=559890071728";
+    private static String url = "https://item.taobao.com/item.htm?id=565272034046";
 
     public static void main(String[] args) {
-        Spider spider = Spider.create(new TaoBaoTBPageProcessor());
+        Spider spider = Spider.create(new TaoBaoTBJSONPageProcessor());
         spider.addUrl(url)
             // .addPipeline(starpropertyProjectPipeline)
             //开启5个线程抓取

@@ -6,7 +6,7 @@ import us.codecraft.webmagic.Spider;
 
 public class TestPin {
 
-    private static String url = "http://mobile.yangkeduo.com/goods.html?goods_id=17748041";
+    private static String url = "http://mobile.yangkeduo.com/goods2.html?goods_id=17748041";
 
     public static void main(String[] args) {
         Spider spider = Spider.create(new PinPageProcessor());

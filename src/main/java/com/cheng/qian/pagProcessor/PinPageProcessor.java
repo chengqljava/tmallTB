@@ -112,8 +112,8 @@ public class PinPageProcessor implements PageProcessor {
                     thumbUrls.add(skus.getJSONObject(i).getString("thumbUrl"));
                     imageDTO = new ImageDTO();
                     imageDTO.setName(specs.getJSONObject(0).getString("spec_value"));
-                    imageDTO.setSaveAddress(SizeImage.S200_200.getAddress());
-                    imageDTO.setSize(SizeImage.S200_200.getSize());
+                    imageDTO.setSaveAddress(SizeImage.S800_800.getAddress());
+                    imageDTO.setSize(SizeImage.S800_800.getSize());
                     imageDTO.setUrl(
                         skus.getJSONObject(i).getString("thumbUrl").replaceAll("@750w_1l_50Q", ""));
                     dtos.add(imageDTO);
@@ -126,7 +126,7 @@ public class PinPageProcessor implements PageProcessor {
                     colorSizeMap.put(specs.getJSONObject(0).getString("spec_value"), sizeList);
                 }
                 sizeList.add(specs.getJSONObject(0).getString("spec_value"));
-                strBuffer.append("\n" + specs.getJSONObject(0).getString("spec_value"));
+                strBuffer.append("\n" + specs.getJSONObject(1).getString("spec_value"));
             }
 
             //获取标题
@@ -156,7 +156,6 @@ public class PinPageProcessor implements PageProcessor {
                     e.printStackTrace();
                 }
             }
-            System.out.println(JSONObject.toJSONString(dtos));
         } catch (Exception e) {
             // TODO: handle exception
             e.printStackTrace();
